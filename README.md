@@ -1,6 +1,7 @@
 # Multi-Table Test Data Generator
 
 > Generate realistic test data for multiple database tables while maintaining referential integrity.
+> This application deployed in Streamlit here [Try out](https://ai-test-data-generator.streamlit.app/)
 
 ## Table of Contents
 
@@ -32,13 +33,13 @@ By leveraging the power of the OpenAI API, this application can generate sample 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/multi-table-data-generator.git
+   git clone https://github.com/NAVEENKUMARMURUGAN/AI-test-data-generator.git
    ```
 
 2. Navigate to the project directory:
 
    ```bash
-   cd multi-table-data-generator
+   cd AI-test-data-generator
    ```
 
 3. Install the required dependencies:
@@ -58,6 +59,7 @@ By leveraging the power of the OpenAI API, this application can generate sample 
 5. Run the Streamlit application:
 
    ```bash
+   cd app
    streamlit run app.py
    ```
 
