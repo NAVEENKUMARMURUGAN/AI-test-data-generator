@@ -10,8 +10,6 @@ from PIL import Image
 def main():
     st.title("AI-Powered Test Data Generator")
     st.subheader("with Constraints & Referential Integrity")
-    logo = Image.open("images/logo.png")
-    st.image(logo, width=200)
 
     # Input fields for database connection
     st.divider()
