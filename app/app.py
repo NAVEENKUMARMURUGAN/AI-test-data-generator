@@ -5,10 +5,12 @@ from data_generator import DataGenerator
 from db_connection import DBConnection
 from table_schema import TableSchema
 from data_converter import DataConverter
+from PIL import Image
 
 def main():
     st.title("AI-Powered Test Data Generator with Constraints & Referential Integrity")
-    st.image("../images/logo.png", use_column_width=True)
+    image = Image.open("images/logo.png")
+    st.image(image)
 
     # Input fields for database connection
     st.header("Enter PostgreSQL Database Connection Details")
