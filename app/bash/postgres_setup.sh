@@ -19,4 +19,6 @@ CREATE TABLE users (
 INSERT INTO users (username, email) VALUES
 ('NAVEENKUMAR MURUGAN', 'mndlsoft@gmail.com'),
 ('MURUGAN', 'mndlsof1@gmail.com');
+
+COMMIT;
 "

@@ -67,6 +67,7 @@ Pipfile.lock
 
 # mypy
 .mypy_cache/
+/app/myenv/
 
 # Pyre type checker
 .pyre/

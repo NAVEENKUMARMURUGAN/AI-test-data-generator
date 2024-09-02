@@ -1,0 +1,5 @@
+streamlit
+psycopg2
+openai
+pandas
+openpyxl
