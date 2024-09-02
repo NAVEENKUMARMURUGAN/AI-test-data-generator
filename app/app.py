@@ -7,8 +7,8 @@ from table_schema import TableSchema
 from data_converter import DataConverter
 
 def main():
-    st.title("AI-Powered Multi-Table Test Data Generator with Constraints")
-    st.subheader("By Understanding Production Data Patterns and Maintaining Referential Integrity")
+    st.title("AI-Powered Test Data Generator with Constraints & Referential Integrity")
+    st.image("images/logo.png", use_column_width=True)
 
     # Input fields for database connection
     st.header("Enter PostgreSQL Database Connection Details")
