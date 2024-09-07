@@ -17,18 +17,18 @@ class DataGenerator:
             data = cur.fetchall()
         return data
 
-    def generate_data_for_tables(self, selected_tables, schemas):
+    def generate_data_for_tables(self, selected_tables, schemas, no_of_records):
         data = {}
         for table in selected_tables:
             sample_data = self.understand_data(table)
             prompt = f"Generate sample data for the table '{table}' with the following schema:\n"
             prompt += f"Here are sample records retrieved from the table '{table}':\n {sample_data}\n"
-            prompt += "STRICTLY UNDERSTAND THE PATTERN AND GENERATE BUT DON'T USE THE SAME DATA DURING GENERATION PRODUCE NEW\n"
             prompt += "And here are the rules:\n"
-            prompt += "1. Generate ONLY a maximum of 100 records\n"
-            prompt += "2. ONLY PROVIDE DATA, NOT INSERT QUERY\n"
-            prompt += "3. STRICTLY PRODUCE ONLY CSV CONTENT WHICH CAN BE WRITTEN TO A FILE, NOT PYTHON OBJECTS\n"
-            prompt += "4. DON'T USE ``` in OUTPUT\n"
+            prompt += "1. STRICTLY UNDERSTAND THE PATTERN AND GENERATE BUT DON'T USE THE SAME DATA DURING GENERATION PRODUCE NEW\n"
+            prompt += f"2. STRICTLY GENERATE '{no_of_records}' of records in the output\n"
+            prompt += "3. ONLY PROVIDE DATA, NOT INSERT QUERY\n"
+            prompt += "4. STRICTLY PRODUCE ONLY CSV CONTENT WHICH CAN BE WRITTEN TO A FILE, NOT PYTHON OBJECTS\n"
+            prompt += "5. DON'T USE ``` in OUTPUT\n"
 
             for column in schemas[table]:
                 column_name, data_type, is_nullable, column_default, constraint_type = column
@@ -56,6 +56,7 @@ class DataGenerator:
                         {"role": "user", "content": prompt}
                     ]
                 )
+
                 data[table] = response.choices[0].message.content
             except Exception as e:
                 st.error(f"Failed to generate data for {table}: {e}")

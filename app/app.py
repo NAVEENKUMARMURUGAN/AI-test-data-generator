@@ -38,11 +38,14 @@ def main():
             format_options = ['CSV', 'JSON', 'EXCEL', 'PARQUET']
             selected_format = st.selectbox("Select Export Format", format_options)
 
+            no_of_records_options = [5, 50, 500, 1000]
+            selected_no_of_records = st.selectbox("Enter number of records (max 1000):", no_of_records_options)
+
             if st.button("Generate Data"):
                 tsobj = TableSchema(st.session_state.conn)
                 schemas = {table: tsobj.get_table_schema(table) for table in selected_tables}
                 dgobj = DataGenerator(st.session_state.conn, st.session_state.relationships)
-                generated_data = dgobj.generate_data_for_tables(selected_tables, schemas)
+                generated_data = dgobj.generate_data_for_tables(selected_tables, schemas, selected_no_of_records)
 
                 all_data_files = []
                 dcobj = DataConverter()
