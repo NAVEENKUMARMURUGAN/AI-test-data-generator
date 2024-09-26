@@ -3,7 +3,7 @@ import streamlit as st
 from io import BytesIO
 import zipfile
 import os
-import pandas as pd  # For handling file data
+import pandas as pd 
 from data_generator import DataGenerator
 from db_connection import DBConnection
 from table_schema import TableSchema
@@ -14,13 +14,16 @@ def main():
     st.title("AI-Powered Test Data Generator")
     st.subheader("with Constraints & Referential Integrity")
 
-    # Step 1: Choose input method
+    api_key = st.text_input("provide OpenAI Key")
+
+    st.session_state.api_key = api_key
+
     option = st.selectbox(
         "Choose input method to generate data:",
         ("PostgreSQL Database", "AWS Glue Catalog", "Upload a Sample File")
     )
 
-    if option == "PostgreSQL Database":
+    if option == "PostgreSQL Database" and api_key:
         gen_type = "postgres"
         st.divider()
         st.header("Enter PostgreSQL Database Connection Details")
@@ -46,7 +49,7 @@ def main():
             if selected_tables:
                 generate_data_flow(gen_type, selected_tables)
 
-    elif option == "AWS Glue Catalog":
+    elif option == "AWS Glue Catalog" and api_key:
         gen_type = "glue"
         st.divider()
         st.header("Enter AWS Glue Catalog Details")
@@ -74,7 +77,7 @@ def main():
             if selected_tables:
                 generate_data_flow(gen_type, selected_tables, database=glue_database, client=st.session_state.client)
 
-    elif option == "Upload a Sample File":
+    elif option == "Upload a Sample File" and api_key:
         gen_type = "file"
         st.divider()
         st.header("Upload a Sample File to Generate Data")

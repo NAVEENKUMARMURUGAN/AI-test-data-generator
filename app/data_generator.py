@@ -5,7 +5,7 @@ import time
 
 class DataGenerator:
     def __init__(self):
-        self.client = OpenAI()
+        self.client = OpenAI(api_key=st.session_state.api_key)
 
     def understand_data(self, conn, table_name):
         if not table_name.isidentifier():
