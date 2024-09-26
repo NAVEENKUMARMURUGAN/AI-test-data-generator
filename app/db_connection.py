@@ -1,23 +1,18 @@
 import psycopg2
 import streamlit as st
+import boto3
 
 class DBConnection:
-    def __init__(self, dbname, user, password, host, port):
-        self.dbname = dbname
-        self.user = user
-        self.password = password
-        self.host = host
-        self.port = port
 
     # Function to create a database connection
-    def create_connection(self):
+    def create_connection(self, dbname, user, password, host, port):
         try:
             conn = psycopg2.connect(
-                dbname=self.dbname,
-                user=self.user,
-                password=self.password,
-                host=self.host,
-                port=self.port
+                dbname=dbname,
+                user=user,
+                password=password,
+                host=host,
+                port=port
             )
             return conn
         except psycopg2.Error as e:
@@ -71,3 +66,50 @@ class DBConnection:
         except psycopg2.Error as e:
             st.error(f"Failed to retrieve table relationships: {e}")
             return []
+
+
+    def assume_role(self, aws_access_key_id, aws_secret_access_key, region):
+        # Provide your user's AWS Access Key and Secret Key
+        sts_client = boto3.client(
+            'sts',
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key
+        )
+        
+        # Assume the role
+        assumed_role_object = sts_client.assume_role(
+            RoleArn="arn:aws:iam::463470974852:role/StreamlitGlueRole",  # Replace with the Role ARN
+            RoleSessionName="AssumeRoleSession1"
+        )
+
+        # Get temporary credentials
+        credentials = assumed_role_object['Credentials']
+
+        # Use temporary credentials to create a new Boto3 client for Glue
+        athena_client = boto3.client(
+            'athena',
+            aws_access_key_id=credentials['AccessKeyId'],
+            aws_secret_access_key=credentials['SecretAccessKey'],
+            aws_session_token=credentials['SessionToken'],
+            region_name=region
+        )
+        
+        return athena_client
+
+    def get_athena_client(self, aws_access_key_id, aws_secret_access_key, region):
+
+        athena_client = self.assume_role(aws_access_key_id, aws_secret_access_key, region)
+        
+        return athena_client
+    
+    # def get_schema(self, table):
+
+    #     athena_client = self.assume_role(aws_access_key_id, aws_secret_access_key, region)
+        
+    #     response = athena_client.list_table_metadata(CatalogName='AwsDataCatalog',
+    #                 DatabaseName=database
+    #                 )
+        
+    #     tables = response['TableMetadataList']
+        
+    #     return tables

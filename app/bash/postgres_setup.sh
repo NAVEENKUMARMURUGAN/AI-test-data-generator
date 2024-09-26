@@ -2,13 +2,13 @@
 docker pull postgres
 
 # Run the PostgreSQL container
-docker run --name postgres-sample -e POSTGRES_PASSWORD=postgres -d -p postgres 5432:5432 postgres
+docker run --name postgres-sample -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres
 
 # Wait a few seconds for PostgreSQL to start
 sleep 5
 
 # Connect to the PostgreSQL shell
-docker exec -it postgres-sample psql -U postgres -c "
+c -c "
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE users (
 
 INSERT INTO users (username, email) VALUES
 ('NAVEENKUMAR MURUGAN', 'mndlsoft@gmail.com'),
-('MURUGAN', 'mndlsof1@gmail.com');
+('MURUGAN', 'murugan1@gmail.com');
 
 COMMIT;
 "

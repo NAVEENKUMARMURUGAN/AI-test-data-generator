@@ -1,0 +1,33 @@
+[
+    {
+      "customer_id": 1,
+      "full_name": "JAYANTH KANAGARAJ",
+      "email": "jayanth@example.com",
+      "timestamp": "2024-09-24 10:10:00"
+    },
+    {
+      "customer_id": 2,
+      "full_name": "PRIYA SUBRAMANIAN",
+      "email": "priya.subramanian@example.com",
+      "timestamp": "2024-09-24 10:15:00"
+    },
+    {
+      "customer_id": 3,
+      "full_name": "SURESH KUMAR",
+      "email": "suresh.kumar@example.com",
+      "timestamp": "2024-09-24 10:20:00"
+    },
+    {
+      "customer_id": 4,
+      "full_name": "MEENA VELAYUTHAM",
+      "email": "meena.velayutham@example.com",
+      "timestamp": "2024-09-24 10:25:00"
+    },
+    {
+      "customer_id": 5,
+      "full_name": "KAVIN VISHWANATH",
+      "email": "kavin.vishwanath@example.com",
+      "timestamp": "2024-09-24 10:30:00"
+    }
+  ]
+  

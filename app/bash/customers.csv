@@ -1,0 +1,6 @@
+customer_id, full_name, email, timestamp
+1, 'JAYANTH KANAGARAJ', 'jayanth@example.com', 2024-09-24 10:10:00
+2, 'PRIYA SUBRAMANIAN', 'priya.subramanian@example.com', 2024-09-24 10:15:00
+3, 'SURESH KUMAR', 'suresh.kumar@example.com', 2024-09-24 10:20:00
+4, 'MEENA VELAYUTHAM', 'meena.velayutham@example.com', 2024-09-24 10:25:00
+5, 'KAVIN VISHWANATH', 'kavin.vishwanath@example.com', 2024-09-24 10:30:00
