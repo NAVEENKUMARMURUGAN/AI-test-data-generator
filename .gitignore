@@ -101,4 +101,3 @@ Thumbs.db
 .terraform/          # Terraform working directory
 terraform.tfstate    # Specific state file
 terraform.tfstate.backup # Specific backup state file
-app/infra/*
