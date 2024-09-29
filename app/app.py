@@ -14,7 +14,7 @@ def main():
     st.title("AI-Powered Test Data Generator")
     st.subheader("with Constraints & Referential Integrity")
 
-    api_key = st.text_input("provide OpenAI Key")
+    api_key = st.text_input("provide OpenAI Key", type='password')
 
     st.session_state.api_key = api_key
 

@@ -101,3 +101,10 @@ infra/*.tfvars.json        # Terraform variable JSON files
 infra/.terraform/          # Terraform working directory
 infra/terraform.tfstate    # Specific state file
 infra/terraform.tfstate.backup # Specific backup state file
+
+infra/.terraform.lock.hcl
+infra/.terraform/
+infra/ec2.tf
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+infra/terraform.tfvars
