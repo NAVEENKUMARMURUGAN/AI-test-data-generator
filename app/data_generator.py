@@ -55,6 +55,33 @@ class DataGenerator:
 
         df = pd.DataFrame(data, columns=column_names)
         return df
+    
+    def generate_data_for_files(self, file_name, data_content, no_of_records):
+        data = {}
+        sample_data = data_content
+        prompt = f"Generate sample data for the table '{file_name}' with the following schema:\n"
+        prompt += f"Here are sample records retrieved from the table '{file_name}':\n {sample_data}\n"
+        prompt += "And here are the rules:\n"
+        prompt += "1. STRICTLY UNDERSTAND THE PATTERN AND GENERATE BUT DON'T USE THE SAME DATA DURING GENERATION PRODUCE NEW\n"
+        prompt += f"2. STRICTLY GENERATE '{no_of_records}' of records in the output\n"
+        prompt += "3. ONLY PROVIDE DATA, NOT INSERT QUERY\n"
+        prompt += "4. STRICTLY PRODUCE ONLY CSV CONTENT WHICH CAN BE WRITTEN TO A FILE, NOT PYTHON OBJECTS\n"
+        prompt += "5. DON'T USE ``` in OUTPUT\n"
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You are an AI test data generator."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            
+            data[file_name] = response.choices[0].message.content
+           
+        except Exception as e:
+            st.error(f"Failed to generate data for {file_name}: {e}")
+            data[file_name] = None
+        return data
 
     def generate_data_for_tables(self, conn, selected_tables: List[str], schemas, relationships, no_of_records):
         data = {}
