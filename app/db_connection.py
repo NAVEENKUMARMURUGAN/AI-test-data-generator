@@ -47,25 +47,36 @@ class DBConnection:
         try:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT
-                        tc.table_name, kcu.column_name,
-                        ccu.table_name AS foreign_table_name,
-                        ccu.column_name AS foreign_column_name
-                    FROM 
-                        information_schema.table_constraints AS tc 
-                        JOIN information_schema.key_column_usage AS kcu
-                        ON tc.constraint_name = kcu.constraint_name
-                        AND tc.table_schema = kcu.table_schema
-                        JOIN information_schema.constraint_column_usage AS ccu
-                        ON ccu.constraint_name = tc.constraint_name
-                        AND ccu.table_schema = tc.table_schema
-                    WHERE tc.constraint_type = 'FOREIGN KEY';
+                        SELECT 
+                            tc.table_name AS foreign_table, 
+                            kcu.column_name AS foreign_column, 
+                            ccu.table_name AS referenced_table, 
+                            ccu.column_name AS referenced_column
+                        FROM 
+                            information_schema.table_constraints AS tc 
+                            JOIN information_schema.key_column_usage AS kcu
+                            ON tc.constraint_name = kcu.constraint_name
+                            JOIN information_schema.constraint_column_usage AS ccu
+                            ON ccu.constraint_name = tc.constraint_name
+                        WHERE tc.constraint_type = 'FOREIGN KEY';
                 """)
                 relationships = cur.fetchall()
-            return relationships
+
+            # Convert to list of dictionaries
+            relationship_dicts = []
+            for rel in relationships:
+                relationship_dicts.append({
+                    'child_table': rel[0],
+                    'child_column': rel[1],
+                    'parent_table': rel[2],
+                    'parent_column': rel[3]
+                })
+            return relationship_dicts
+
         except psycopg2.Error as e:
             st.error(f"Failed to retrieve table relationships: {e}")
             return []
+
 
 
     def assume_role(self, aws_access_key_id, aws_secret_access_key, region):
@@ -101,15 +112,3 @@ class DBConnection:
         athena_client = self.assume_role(aws_access_key_id, aws_secret_access_key, region)
         
         return athena_client
-    
-    # def get_schema(self, table):
-
-    #     athena_client = self.assume_role(aws_access_key_id, aws_secret_access_key, region)
-        
-    #     response = athena_client.list_table_metadata(CatalogName='AwsDataCatalog',
-    #                 DatabaseName=database
-    #                 )
-        
-    #     tables = response['TableMetadataList']
-        
-    #     return tables
