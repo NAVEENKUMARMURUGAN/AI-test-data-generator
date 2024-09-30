@@ -126,7 +126,7 @@ class DataGenerator:
         response = client.start_query_execution(
             QueryString=query,
             QueryExecutionContext={'Database': database},
-            ResultConfiguration={'OutputLocation': 's3://your-output-bucket/'}
+            ResultConfiguration={'OutputLocation': 's3://test-data-gen-sample-athena/'}
         )
         query_execution_id = response['QueryExecutionId']
 
