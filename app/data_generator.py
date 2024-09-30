@@ -96,7 +96,6 @@ class DataGenerator:
                     if referenced_table in foreign_key_values and referenced_column in foreign_key_values[referenced_table]:
                         prompt += f"6. For column {foreign_column}, use values from this list to ensure referential integrity: {foreign_key_values[referenced_table][referenced_column]}\n"
 
-            st.write(prompt)
             try:
                 response = self.client.chat.completions.create(
                     model="gpt-4o-mini",
