@@ -1,19 +1,37 @@
-from ast import Str
-from openai import OpenAI
+import boto3
 import streamlit as st
 import pandas as pd
-import time
-from typing import List, Dict, Tuple
 from io import StringIO
-
-from openai import OpenAI
-import streamlit as st
-import pandas as pd
 from typing import List, Dict
 
 class DataGenerator:
     def __init__(self):
-        self.client = OpenAI(api_key=st.session_state.api_key)
+        # Initialize the boto3 client for Bedrock
+        self.client = boto3.client('bedrock-agent-runtime', region_name="ap-southeast-2")  # Update the region as necessary
+        self.agent_id = 'LGWJLKSFOV'  # Replace with your actual Bedrock agent ID
+        self.agent_alias_id='ZEIHOS2QG0'
+
+    def invoke_bedrock_model(self, prompt: str, session_id: str):
+        """Invoke Amazon Bedrock agent with the given prompt."""
+        try:
+            # Invoking the Bedrock agent
+            response = self.client.invoke_agent(
+                agentId=self.agent_id,
+                agentAliasId=self.agent_alias_id,
+                sessionId=session_id,
+                inputText=prompt
+            )
+            
+            completion = ""
+
+            for event in response.get("completion"):
+                chunk = event["chunk"]
+                completion = completion + chunk["bytes"].decode()
+
+            return completion
+        except Exception as e:
+            st.error(f"Error invoking Bedrock agent: {e}")
+            return None
 
     def sort_tables_by_dependency(self, selected_tables: List[str], relationships: List[Dict]):
         """Sort tables based on foreign key dependencies."""
@@ -56,28 +74,26 @@ class DataGenerator:
         df = pd.DataFrame(data, columns=column_names)
         return df
     
-    def generate_data_for_files(self, file_name, data_content, no_of_records):
+    def generate_data_for_files(self, file_name, data_content, no_of_records, session_id):
         data = {}
         sample_data = data_content
         prompt = f"Generate sample data for the table '{file_name}' with the following schema:\n"
         prompt += f"Here are sample records retrieved from the table '{file_name}':\n {sample_data}\n"
         prompt += "And here are the rules:\n"
         prompt += "1. STRICTLY UNDERSTAND THE PATTERN AND GENERATE BUT DON'T USE THE SAME DATA DURING GENERATION PRODUCE NEW\n"
-        prompt += f"2. STRICTLY GENERATE '{no_of_records}' of records in the output\n"
+        prompt += f"2. STRICTLY GENERATE '{no_of_records}' records in the output\n"
         prompt += "3. ONLY PROVIDE DATA, NOT INSERT QUERY\n"
         prompt += "4. STRICTLY PRODUCE ONLY CSV CONTENT WHICH CAN BE WRITTEN TO A FILE, NOT PYTHON OBJECTS\n"
-        prompt += "5. DON'T USE ``` in OUTPUT\n"
+        prompt += "5. DON'T USE ``` IN OUTPUT\n"
+        
         try:
-            response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "You are an AI test data generator."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
+            # Invoke the Bedrock agent
+            response = self.invoke_bedrock_model(prompt, 'testdata1234567')
             
-            data[file_name] = response.choices[0].message.content
-           
+            if response:
+                data[file_name] = response
+            else:
+                data[file_name] = None
         except Exception as e:
             st.error(f"Failed to generate data for {file_name}: {e}")
             data[file_name] = None
@@ -124,78 +140,21 @@ class DataGenerator:
                         prompt += f"6. For column {foreign_column}, use values from this list to ensure referential integrity: {foreign_key_values[referenced_table][referenced_column]}\n"
 
             try:
-                response = self.client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[
-                        {"role": "system", "content": "You are an AI test data generator."},
-                        {"role": "user", "content": prompt}
-                    ]
-                )
+                # Invoke Bedrock agent
+                response = self.invoke_bedrock_model(prompt, 'testdata1234567')
 
-                generated_data = response.choices[0].message.content
-                data[table] = generated_data
+                if response:
+                    generated_data = response
+                    data[table] = generated_data
 
-                # Extract generated values for potential foreign key references
-                df = pd.read_csv(StringIO(generated_data))  # Use StringIO from io module
-                for column in df.columns:
-                    foreign_key_values[table][column] = df[column].tolist()
+                    # Extract generated values for potential foreign key references
+                    df = pd.read_csv(StringIO(generated_data))  # Use StringIO from io module
+                    for column in df.columns:
+                        foreign_key_values[table][column] = df[column].tolist()
 
-            except Exception as e:
-                st.error(f"Failed to generate data for {table}: {e}")
-                data[table] = None
+                else:
+                    data[table] = None
 
-        return data
-
-
-    def run_athena_query(self, client, database, table):
-        """Run a query on Athena to retrieve data."""
-        query = f"SELECT * FROM {table} LIMIT 10"
-        response = client.start_query_execution(
-            QueryString=query,
-            QueryExecutionContext={'Database': database},
-            ResultConfiguration={'OutputLocation': 's3://test-data-gen-sample-athena/'}
-        )
-        query_execution_id = response['QueryExecutionId']
-
-        # Wait for query to finish
-        while True:
-            status = client.get_query_execution(QueryExecutionId=query_execution_id)
-            state = status['QueryExecution']['Status']['State']
-            if state == 'SUCCEEDED':
-                print("Query succeeded")
-                break
-            elif state in ['FAILED', 'CANCELLED']:
-                print(f"Query {state}: {status['QueryExecution']['Status']['StateChangeReason']}")
-                return None
-            time.sleep(2)
-
-        results = client.get_query_results(QueryExecutionId=query_execution_id)
-        return results
-
-    def generate_data_for_athena_tables(self, client, selected_tables: List[str], schemas: Dict, no_of_records: int, database: str):
-        """Generate data for Athena tables."""
-        data = {}
-        for table in selected_tables:
-            sample_data = self.run_athena_query(client, database, table)
-            prompt = f"Generate sample data for the table '{table}' with the following schema:\n"
-            prompt += f"{schemas}"
-            prompt += f"Here are sample records retrieved from the table '{table}':\n {sample_data}\n"
-            prompt += "And here are the rules:\n"
-            prompt += "1. STRICTLY UNDERSTAND THE PATTERN AND GENERATE BUT DON'T USE THE SAME DATA DURING GENERATION PRODUCE NEW\n"
-            prompt += f"2. STRICTLY GENERATE '{no_of_records}' of records in the output\n"
-            prompt += "3. ONLY PROVIDE DATA, NOT INSERT QUERY\n"
-            prompt += "4. STRICTLY PRODUCE ONLY CSV CONTENT WHICH CAN BE WRITTEN TO A FILE, NOT PYTHON OBJECTS\n"
-            prompt += "5. DON'T USE ``` in OUTPUT\n"
-
-            try:
-                response = self.client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[
-                        {"role": "system", "content": "You are an AI test data generator."},
-                        {"role": "user", "content": prompt}
-                    ]
-                )
-                data[table] = response.choices[0].message.content
             except Exception as e:
                 st.error(f"Failed to generate data for {table}: {e}")
                 data[table] = None
